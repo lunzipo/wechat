@@ -49,5 +49,56 @@ def wechat():
         return auth_ret
 
 
+'''
+request接收数据：
+request.args:用于接收get方式的请求，格式为键值对
+request.form:用于接收post方式的请求，格式为键值对
+request.data:用于接收请求，格式为非键值对
+request.files:用于接收文件
+'''
+
+#POST请求方式：接收微信的请求
+@app.route('/weixin',methods=['POST'])
+def msg_handle():
+    auth_ret=auth()
+    if auth_ret==True:
+        #接收xml数据
+        xml_data=request.data
+        #转成dict数据
+        dict_data=xmltodict.parse(xml_data)
+        #获取根数据xml
+        xml=dict_data.get('xml')
+        #数据类型判断
+        if xml.get('MsgType')=='text':#文本
+            #当前消息是文本类型
+            # print xml.get('Content')
+            #<xml> <ToUserName><![CDATA[toUser]]></ToUserName> <FromUserName><![CDATA[fromUser]]></FromUserName> <CreateTime>12345678</CreateTime> <MsgType><![CDATA[text]]></MsgType> <Content><![CDATA[你好]]></Content> </xml>
+            #根据文档格式构造数据dict
+            dict_ret={'ToUserName':xml.get('FromUserName'),
+                      'FromUserName':xml.get('ToUserName'),
+                      'CreateTime':int(time()),
+                      'MsgType':'text',
+                      'Content':xml.get('Content')+u'，你美你说的都对'}
+            #将dict转换成xml
+            xml_ret=xmltodict.unparse({'xml':dict_ret})
+            #返回
+            return xml_ret
+        elif xml.get('MsgType')=='event':
+            dict_ret={'ToUserName':xml.get('FromUserName'),
+                      'FromUserName':xml.get('ToUserName'),
+                      'CreateTime':int(time()),
+                      'MsgType':'text',
+                      'Content':xml.get('EventKey')
+                  }
+            #将dict转换成xml
+            xml_ret=xmltodict.unparse({'xml':dict_ret})
+            #返回
+            return xml_ret
+        else:
+            pass
+    else:
+        return auth_ret
+
+
 if __name__ == '__main__':
     app.run()

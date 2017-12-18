@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 from flask import request, jsonify
 from hashlib import sha1
-# import xmltodict
+import xmltodict
 from time import time
 #如果当前账户为s8014，则路由为/wechat8014，启动端口为port=8014
 #?signature=2023d54455f0871a3fb05fa9beb3465986b26ef4
